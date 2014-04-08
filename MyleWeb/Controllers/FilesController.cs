@@ -28,7 +28,7 @@ namespace MyleWeb.Controllers
             {
                 var dir = Path.Combine(HttpContext.Current.Server.MapPath("~/Uploads/"), DateTime.UtcNow.ToString("yyyy-MM-dd"));
                 Directory.CreateDirectory(dir);
-                var fileStream = File.Create(Path.Combine(dir, filename));
+                var fileStream = File.Create(Path.Combine(dir, DateTime.UtcNow.ToString("HH-mm-ss") + ".caf"));
 
                 requestStream.CopyTo(fileStream);
                 fileStream.Close();
