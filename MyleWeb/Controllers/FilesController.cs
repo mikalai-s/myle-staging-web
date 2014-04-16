@@ -18,7 +18,7 @@ namespace MyleWeb.Controllers
 
         //
         // Post: /Files/
-        public HttpResponseMessage Post([FromUri]string filename)
+        public HttpResponseMessage Post([FromUri]string id)
         {
             var task = this.Request.Content.ReadAsStreamAsync();
             task.Wait();
@@ -28,7 +28,7 @@ namespace MyleWeb.Controllers
             {
                 var dir = Path.Combine(HttpContext.Current.Server.MapPath("~/Uploads/"), DateTime.UtcNow.ToString("yyyy-MM-dd"));
                 Directory.CreateDirectory(dir);
-                var fileStream = File.Create(Path.Combine(dir, DateTime.UtcNow.ToString("HH-mm-ss") + ".caf"));
+                var fileStream = File.Create(Path.Combine(dir, DateTime.UtcNow.ToString("HH-mm-ss") + " - " + id + ".json"));
 
                 requestStream.CopyTo(fileStream);
                 fileStream.Close();

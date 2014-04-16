@@ -13,19 +13,19 @@ namespace MyleWeb
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            /*
+
+            // TODO: remove when next myle app is released
+            routes.MapHttpRoute(
+                name: "TemporaryAPI",
+                routeTemplate: "Files/{id}",
+                defaults: new { controller = "Files" }
+            );
+            
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
-            */
-            routes.MapHttpRoute(
-                name: "DefaultApi2",
-                routeTemplate: "{controller}/{filename}",
-                defaults: new { filename = RouteParameter.Optional }
-
-            );
+            );           
         }
     }
 }

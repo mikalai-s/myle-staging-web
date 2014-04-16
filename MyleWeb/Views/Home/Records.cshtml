@@ -1,0 +1,27 @@
+﻿@model Record[]
+
+<h2>@ViewBag.Title</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Text</th>
+            <th>Date</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (var i = 0; i < Model.Length; i ++)
+        {
+            <tr>
+                <td>@(i + 1)</td>
+                <td>@Model[i].text</td>
+                <td>@Model[i].LocalDate</td>
+                <td><a href="@string.Format("https://maps.google.com/maps?q={0},{1}", Model[i].lat, Model[i].lng)">@string.Format("{0}, {1}", Model[i].lat, Model[i].lng)</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
