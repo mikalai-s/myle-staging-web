@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using MyleWeb.Models;
 using Newtonsoft.Json;
+using OpenLibrary.Document;
 
 namespace MyleWeb.Controllers
 {
@@ -46,13 +46,16 @@ namespace MyleWeb.Controllers
             if(account == null) { return HttpNotFound(); }
 
             this.ViewBag.Title = account.Name + " Records";
+            this.ViewBag.AccountId = id;
 
-            var records = EnumerateRecords(account)
+            return View(GetAccountRecords(account).ToArray());
+        }
+
+        private IEnumerable<RecordInfo> GetAccountRecords(Account account)
+        {
+            return EnumerateRecords(account)
                 .Distinct(new RecordInfo.Comparer())
-                .OrderByDescending(r => r.Record.date)
-                .ToArray();
-
-            return View(records);
+                .OrderByDescending(r => r.Record.date);
         }
 
         private IEnumerable<RecordInfo> EnumerateRecords(Account account)
@@ -79,10 +82,26 @@ namespace MyleWeb.Controllers
             }
         }
 
-        public ContentResult Download(string id)
+        public FileResult Download(Guid? id)
         {
-            //new ContentResult().Content = 
-            return null;
+            var account = Config.Accounts.FirstOrDefault(d => d.Id == id);
+            if (account == null) { throw new InvalidOperationException(); }
+
+            var records = GetAccountRecords(account)
+                .Select(r => new
+                {
+                    Text = r.Record.text,
+                    Date = r.Date.ToString(),
+                    Device = r.Device,
+                    Longitude = r.Record.lng,
+                    Latitude = r.Record.lat
+                });
+            var path = Path.Combine(Path.GetTempPath(), "__export.tmp");
+            
+            Excel.ToExcel(records.ToArray(), path, account.Name + " Records");
+
+            return File(path, "application/vnd.ms-excel", account.Name + " Records.xls");
+
         }
     }
 }
