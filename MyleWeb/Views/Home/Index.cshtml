@@ -1,11 +1,12 @@
-﻿@model DeviceInfo[]
+﻿@model AccountInfo[]
 
 <h2>Uploads</h2>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Device</th>
+            <th>Account</th>
+            <th>Devices</th>
             <th>Last Exported</th>
             <th>Times Exported</th>
         </tr>
@@ -14,7 +15,8 @@
         @foreach (var info in Model)
         {
             <tr>
-                <td>@Html.ActionLink(info.Device.Name, "Records", new { id = info.Device.Id }, null)</td>
+                <td>@Html.ActionLink(info.Account.Name, "Records", new { id = info.Account.Id }, null)</td>
+                <td>@string.Join(", ", info.Account.Devices.Select(d => d.Name))</td>
                 <td>@info.LastExported</td>
                 <td>@info.TimesExported</td>
             </tr>

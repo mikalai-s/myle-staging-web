@@ -11,21 +11,23 @@ namespace MyleWeb.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
-        {
+        public ActionResult Index(Guid? key)
+        {   
+            if(key != Config.AdminKey) { return HttpNotFound(); }
+
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(Config.DisplayTimeZoneId);
 
             var dir = this.HttpContext.Server.MapPath("~/Uploads");
-            var infos = Config.Devices
-                .Select(d => 
+            var infos = Config.Accounts
+                .Select(a =>
                     {
-                        var files = Directory
-                            .GetFiles(dir, "*" + d.Id + ".json", SearchOption.AllDirectories)
+                        var files = a.Devices
+                            .SelectMany(d => Directory.GetFiles(dir, "*" + d.Id + ".json", SearchOption.AllDirectories))
                             .Select(f => new FileInfo(f))
                             .ToArray();
-                        return new DeviceInfo
+                        return new AccountInfo
                         {
-                            Device = d,
+                            Account = a,
                             TimesExported = files.Length,
                             LastExported = files
                                 .Select(f => TimeZoneInfo.ConvertTime(f.CreationTimeUtc, timeZone))
@@ -38,28 +40,43 @@ namespace MyleWeb.Controllers
             return View(infos);
         }
 
-        public ActionResult Records(string id)
+        public ActionResult Records(Guid? id)
         {
-            var device = Config.Devices.FirstOrDefault(d => d.Id == id);
-            if(device == null) { return HttpNotFound(); }
+            var account = Config.Accounts.FirstOrDefault(d => d.Id == id);
+            if(account == null) { return HttpNotFound(); }
 
-            this.ViewBag.Title = device.Name + " Records";
+            this.ViewBag.Title = account.Name + " Records";
 
-            var dir = this.HttpContext.Server.MapPath("~/Uploads");
-            var file = Directory
-                .GetFiles(dir, "*" + id + ".json", SearchOption.AllDirectories)
-                .Select(f => new FileInfo(f))
-                .OrderByDescending(f => f.CreationTimeUtc)
-                .FirstOrDefault()
-                .OpenText()
-                .ReadToEnd();
-
-            var records = JsonConvert.DeserializeObject<Record[]>(file)
-                .Distinct(new Record.Comparer())
-                .OrderByDescending(r => r.date)
+            var records = EnumerateRecords(account)
+                .Distinct(new RecordInfo.Comparer())
+                .OrderByDescending(r => r.Record.date)
                 .ToArray();
 
             return View(records);
+        }
+
+        private IEnumerable<RecordInfo> EnumerateRecords(Account account)
+        {
+            var dir = this.HttpContext.Server.MapPath("~/Uploads");
+
+            foreach (var device in account.Devices)
+            {
+                var content = Directory
+                    .GetFiles(dir, "*" + device.Id + ".json", SearchOption.AllDirectories)
+                    .Select(f => new FileInfo(f))
+                    .OrderByDescending(f => f.CreationTimeUtc)
+                    .FirstOrDefault()
+                    .OpenText()
+                    .ReadToEnd();
+
+                foreach (var record in JsonConvert.DeserializeObject<Record[]>(content))
+                {
+                    yield return new RecordInfo(record)
+                    {
+                        Device = device.Name
+                    };
+                }
+            }
         }
 
         public ContentResult Download(string id)

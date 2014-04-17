@@ -8,13 +8,6 @@ namespace MyleWeb.Models
     public class Device
     {
         public string Name;
-        public string Id;
-    }
-
-    public class DeviceInfo
-    {
-        public Device Device;
-        public int TimesExported;
-        public DateTime LastExported;
+        public Guid Id;
     }
 }

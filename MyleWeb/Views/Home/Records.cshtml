@@ -1,4 +1,4 @@
-﻿@model Record[]
+﻿@model RecordInfo[]
 
 <h2>@ViewBag.Title</h2>
 
@@ -7,6 +7,7 @@
         <tr>
             <th>#</th>
             <th>Text</th>
+            <th>Device</th>
             <th>Date</th>
             <th>Location</th>
         </tr>
@@ -15,10 +16,11 @@
         @for (var i = 0; i < Model.Length; i ++)
         {
             <tr>
-                <td>@(i + 1)</td>
-                <td>@Model[i].text</td>
-                <td>@Model[i].LocalDate</td>
-                <td><a href="@string.Format("https://maps.google.com/maps?q={0},{1}", Model[i].lat, Model[i].lng)">@string.Format("{0}, {1}", Model[i].lat, Model[i].lng)</a></td>
+                <td>@(Model.Length - i)</td>
+                <td>@Model[i].Record.text</td>
+                <td>@Model[i].Device</td>
+                <td>@Model[i].Date</td>
+                <td><a href="@Model[i].MapUrl">@string.Format("{0}, {1}", Model[i].Record.lat, Model[i].Record.lng)</a></td>
             </tr>
         }
     </tbody>

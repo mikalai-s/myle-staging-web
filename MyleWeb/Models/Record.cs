@@ -11,34 +11,40 @@ namespace MyleWeb.Models
         public string date;
         public double lat;
         public double lng;
+    }
 
-        public DateTime LocalDate
+    public class RecordInfo
+    {
+        public Record Record;
+        public DateTime Date;
+        public string Device;
+        public string MapUrl;
+
+        public RecordInfo(Record record)
         {
-            get
-            {
-                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(Config.DisplayTimeZoneId);
-                return TimeZoneInfo.ConvertTime(DateTime.Parse(this.date + "Z"), timeZone);
-            }
+            this.Record = record;
+            this.Date = TimeZoneInfo.ConvertTime(DateTime.Parse(record.date + "Z"), TimeZoneInfo.FindSystemTimeZoneById(Config.DisplayTimeZoneId));
+            this.MapUrl = string.Format("https://maps.google.com/maps?q={0},{1}", record.lat, record.lng);
         }
 
-        public class Comparer : IEqualityComparer<Record>
+        public class Comparer : IEqualityComparer<RecordInfo>
         {
-            public bool Equals(Record x, Record y)
+            public bool Equals(RecordInfo x, RecordInfo y)
             {
                 if (x == null || y == null) { return false; }
 
-                return x.text == y.text
-                    && x.date == y.date
-                    && x.lat == y.lat
-                    && x.lng == y.lng;
+                return x.Record.text == y.Record.text
+                    && x.Record.date == y.Record.date
+                    && x.Record.lat == y.Record.lat
+                    && x.Record.lng == y.Record.lng;
             }
 
-            public int GetHashCode(Record o)
+            public int GetHashCode(RecordInfo o)
             {
-                return ((o.text == null) ? 0 : o.text.GetHashCode())
-                    ^ ((o.date == null) ? 0 : o.date.GetHashCode())
-                    ^ o.lat.GetHashCode()
-                    ^ o.lng.GetHashCode();
+                return ((o.Record.text == null) ? 0 : o.Record.text.GetHashCode())
+                    ^ ((o.Record.date == null) ? 0 : o.Record.date.GetHashCode())
+                    ^ o.Record.lat.GetHashCode()
+                    ^ o.Record.lng.GetHashCode();
             }
         }
     }
